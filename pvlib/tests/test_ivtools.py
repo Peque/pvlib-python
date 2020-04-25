@@ -76,23 +76,17 @@ def test_fit_sde_sandia_bad_iv(get_bad_iv_curves):
 @requires_pysam
 def test_fit_sdm_cec_sam(get_cec_params_cansol_cs5p_220p):
     input_data = get_cec_params_cansol_cs5p_220p['input']
-    I_L_ref, I_o_ref, R_sh_ref, R_s, a_ref, Adjust = \
-        ivtools.fit_sdm_cec_sam(
-            celltype='polySi', v_mp=input_data['V_mp_ref'],
-            i_mp=input_data['I_mp_ref'], v_oc=input_data['V_oc_ref'],
-            i_sc=input_data['I_sc_ref'], alpha_sc=input_data['alpha_sc'],
-            beta_voc=input_data['beta_voc'],
-            gamma_pmp=input_data['gamma_pmp'],
-            cells_in_series=input_data['cells_in_series'])
-    expected = pd.Series(get_cec_params_cansol_cs5p_220p['output'])
-    modeled = pd.Series(index=expected.index, data=np.nan)
-    modeled['a_ref'] = a_ref
-    modeled['I_L_ref'] = I_L_ref
-    modeled['I_o_ref'] = I_o_ref
-    modeled['R_sh_ref'] = R_sh_ref
-    modeled['R_s'] = R_s
-    modeled['Adjust'] = Adjust
-    assert np.allclose(modeled.values, expected.values, rtol=5e-2)
+    parameters = ivtools.fit_sdm_cec_sam(
+        celltype='polySi', v_mp=input_data['V_mp_ref'],
+        i_mp=input_data['I_mp_ref'], v_oc=input_data['V_oc_ref'],
+        i_sc=input_data['I_sc_ref'], alpha_sc=input_data['alpha_sc'],
+        beta_voc=input_data['beta_voc'], gamma_pmp=input_data['gamma_pmp'],
+        cells_in_series=input_data['cells_in_series'],
+    )
+    names = ['I_L_ref', 'I_o_ref', 'R_sh_ref', 'R_s', 'a_ref', 'Adjust']
+    modeled = dict(zip(names, parameters))
+    expected = get_cec_params_cansol_cs5p_220p['output']
+    assert modeled == pytest.approx(expected, rel=5e-2)
 
 
 @requires_pysam
